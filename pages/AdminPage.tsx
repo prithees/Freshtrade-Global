@@ -1,80 +1,23 @@
 "use client"
 
-import React, { useState, useMemo } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Search, Plus, Edit2, Trash2, ChevronDown, Filter, DownloadCloud, CheckCircle } from "lucide-react"
 
-interface Product {
-  productId: string
+export interface Product {
+  _id?: string
   productName: string
   category: string
   pricePerUnit: number
   unit: string
   minOrderQty: number
   stockStatus: "In Stock" | "Low Stock" | "Out of Stock"
-  imageUrl?: string
-  tags?: string[]
+  imageUrl: string
+  tags: string[]
   description: string
-  quantity?: number
 }
 
-const MOCK_PRODUCTS: Product[] = [
-  {
-    productId: "PROD001",
-    productName: "Organic Tomatoes",
-    category: "Vegetables",
-    pricePerUnit: 45,
-    unit: "kg",
-    minOrderQty: 10,
-    stockStatus: "In Stock",
-    tags: ["organic", "fresh", "red"],
-    description: "Fresh red tomatoes from local farms",
-  },
-  {
-    productId: "PROD002",
-    productName: "Basmati Rice",
-    category: "Grains",
-    pricePerUnit: 120,
-    unit: "kg",
-    minOrderQty: 25,
-    stockStatus: "In Stock",
-    tags: ["rice", "basmati", "premium"],
-    description: "Premium quality basmati rice",
-  },
-  {
-    productId: "PROD003",
-    productName: "Spinach",
-    category: "Vegetables",
-    pricePerUnit: 35,
-    unit: "kg",
-    minOrderQty: 5,
-    stockStatus: "Low Stock",
-    tags: ["leafy", "green", "healthy"],
-    description: "Fresh spinach leaves",
-  },
-  {
-    productId: "PROD004",
-    productName: "Mango",
-    category: "Fruits",
-    pricePerUnit: 60,
-    unit: "dozen",
-    minOrderQty: 5,
-    stockStatus: "Out of Stock",
-    tags: ["mango", "fruit", "seasonal"],
-    description: "Premium mangoes in season",
-  },
-  {
-    productId: "PROD005",
-    productName: "Chicken Breast",
-    category: "Meat",
-    pricePerUnit: 280,
-    unit: "kg",
-    minOrderQty: 10,
-    stockStatus: "In Stock",
-    tags: ["chicken", "protein", "fresh"],
-    description: "Fresh boneless chicken breast",
-  },
-]
+const API_URL = "http://localhost:4000/api/products"
 
 const ProductFormModal: React.FC<{
   product: Partial<Product> | null
@@ -86,13 +29,16 @@ const ProductFormModal: React.FC<{
 
   React.useEffect(() => {
     setFormData(
-      product || {
-        productId: `PROD${Date.now()}`,
-        tags: [],
-        stockStatus: "In Stock",
-      },
+      product !== null
+        ? product
+        : {
+            tags: [],
+            stockStatus: "In Stock",
+          },
     )
   }, [product])
+
+  if (product === null) return null
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -116,8 +62,6 @@ const ProductFormModal: React.FC<{
     }, 1200)
   }
 
-  if (!product) return null
-
   return (
     <AnimatePresence>
       <motion.div
@@ -137,9 +81,7 @@ const ProductFormModal: React.FC<{
         >
           <form onSubmit={handleSubmit} className="p-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-3xl font-bold text-gray-900">
-                {product.productId ? "Edit Product" : "Add New Product"}
-              </h2>
+              <h2 className="text-3xl font-bold text-gray-900">{formData._id ? "Edit Product" : "Add New Product"}</h2>
               <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-700 transition text-2xl">
                 ✕
               </button>
@@ -290,12 +232,21 @@ const StatsCard: React.FC<{ label: string; value: string | number; icon: React.R
 )
 
 const AdminPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS)
+  const [products, setProducts] = useState<Product[]>([])
   const [editingProduct, setEditingProduct] = useState<Partial<Product> | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
   const [selectedStatus, setSelectedStatus] = useState<string>("All")
   const [sortBy, setSortBy] = useState<"name" | "price" | "stock">("name")
+
+  // Fetch products from API on mount
+  useEffect(() => {
+    console.log("Fetching products from API:", API_URL)
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then(setProducts)
+      .catch(() => setProducts([]))
+  }, [])
 
   const filteredAndSortedProducts = useMemo(() => {
     const filtered = products.filter((p) => {
@@ -331,19 +282,45 @@ const AdminPage: React.FC = () => {
     outOfStock: products.filter((p) => p.stockStatus === "Out of Stock").length,
   }
 
-  const handleSaveProduct = (productToSave: Product) => {
-    const exists = products.some((p) => p.productId === productToSave.productId)
-    if (exists) {
-      setProducts(products.map((p) => (p.productId === productToSave.productId ? productToSave : p)))
-    } else {
-      setProducts([...products, productToSave])
+  // Save (Create or Update) product
+  const handleSaveProduct = async (productToSave: Product) => {
+    try {
+      console.log("comes in",productToSave  );
+      if (productToSave._id) {
+        // UPDATE existing product
+        const res = await fetch(`${API_URL}/${productToSave._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productToSave),
+        })
+        const updated = await res.json()
+        setProducts((prev) => prev.map((p) => (p._id === updated._id ? updated : p)))
+      } else {
+        console.log("creating new product");
+        // CREATE new product
+        const res = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(productToSave),
+        })
+        console.log("response from create:", res);
+        const created = await res.json()
+        setProducts((prev) => [...prev, created])
+      }
+      setEditingProduct(null)
+    } catch (err) {
+      console.error("Save failed:", err)
     }
-    setEditingProduct(null)
   }
 
-  const handleDeleteProduct = (productId: string) => {
+  const handleDeleteProduct = async (productId: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      setProducts(products.filter((p) => p.productId !== productId))
+      try {
+        await fetch(`${API_URL}/${productId}`, { method: "DELETE" })
+        setProducts((prev) => prev.filter((p) => p._id !== productId))
+      } catch (err) {
+        console.error("Delete failed:", err)
+      }
     }
   }
 
@@ -526,7 +503,7 @@ const AdminPage: React.FC = () => {
                   {filteredAndSortedProducts.length > 0 ? (
                     filteredAndSortedProducts.map((product, index) => (
                       <motion.tr
-                        key={product.productId}
+                        key={product._id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -568,7 +545,7 @@ const AdminPage: React.FC = () => {
                               <Edit2 className="w-5 h-5" />
                             </motion.button>
                             <motion.button
-                              onClick={() => handleDeleteProduct(product.productId)}
+                              onClick={() => product._id && handleDeleteProduct(product._id)}
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
