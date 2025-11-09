@@ -23,8 +23,6 @@ export const NAV_LINKS = [
 
 export const ALL_NAV_LINKS = [
   ...NAV_LINKS,
-  { name: 'Careers', path: '/careers' },
-  { name: 'Contact', path: '/contact' },
 ]
 
 export const CURRENCY_RATES = {
