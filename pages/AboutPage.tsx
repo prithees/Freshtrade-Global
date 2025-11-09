@@ -194,7 +194,7 @@ const AboutPage: React.FC = () => {
           Partner with us to access premium produce, reliable logistics, and real-time insights.
         </p>
         <motion.a
-          href="/contact"
+          href="/#/contact"
           className="inline-block bg-white text-emerald-700 font-semibold px-10 py-4 rounded-full shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-transform"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}

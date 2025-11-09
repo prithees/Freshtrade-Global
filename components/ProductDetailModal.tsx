@@ -104,17 +104,17 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
               {product.productName}
             </motion.h2>
 
-            <motion.p
+            {/* <motion.p
               className="text-gray-600 leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
               {product.description}
-            </motion.p>
+            </motion.p> */}
 
             {/* Tags */}
-            <motion.div
+            {/* <motion.div
               className="flex flex-wrap gap-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -130,7 +130,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
                   {tag}
                 </motion.span>
               ))}
-            </motion.div>
+            </motion.div> */}
 
             {/* Product Info */}
             <motion.div
@@ -157,27 +157,25 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
               </div>
               <div>
                 <span className="font-semibold text-gray-700">Price:</span>{' '}
-                <a href="#/pricing" onClick={onClose} className="text-green-600 hover:underline font-semibold">
-                  View Price List
-                </a>
+                <span className="text-gray-800 font-bold">${product.pricePerUnit} / {product.unit}</span>
               </div>
             </motion.div>
 
             {/* CTA Button */}
-            {/* <motion.button
+             {/* <motion.button
               className="relative overflow-hidden bg-green-600 text-white font-semibold px-6 py-3 rounded-full mt-4 shadow-md hover:shadow-lg hover:bg-green-700 transition"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => alert('Thank you for your interest!')}
             >
-              {/* <span className="relative z-10">Enquire Now</span>
+               <span className="relative z-10">Enquire Now</span>
               <motion.span
                 className="absolute inset-0 bg-white/20 rounded-full"
                 initial={{ scale: 0, opacity: 0 }}
                 whileHover={{ scale: 3, opacity: 0 }}
                 transition={{ duration: 0.8 }}
-              /> */}
-            {/* </motion.button> */} */
+              /> 
+             </motion.button>  */}
           </div>
         </motion.div>
       </motion.div>
