@@ -1,88 +1,60 @@
-
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-
-interface User {
-  name: string;
-  email: string;
-}
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (email: string, pass: string) => Promise<void>;
-  signup: (name: string, email: string, pass: string) => Promise<void>;
+  user: any;
+  signup: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const API_URL = "http://localhost:4000/api/users"; // 🔗 backend base URL
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<any>(
+    JSON.parse(localStorage.getItem("user") || "null")
+  );
 
-  useEffect(() => {
-    // Simulate checking for a user session from localStorage
-    try {
-      const storedUser = localStorage.getItem('freshTradeUser');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
-    } catch (error) {
-        console.error("Failed to parse user from localStorage", error)
-        localStorage.removeItem('freshTradeUser');
-    }
-    setLoading(false);
-  }, []);
-
-  // Mock login function
-  const login = async (email: string, pass: string): Promise<void> => {
-    setLoading(true);
-    // In a real app, you'd make an API call here.
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const mockUser: User = { name: 'Admin User', email: email };
-            localStorage.setItem('freshTradeUser', JSON.stringify(mockUser));
-            setUser(mockUser);
-            setLoading(false);
-            resolve();
-        }, 1000);
+  const signup = async (name: string, email: string, password: string) => {
+    const res = await fetch(`${API_URL}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
     });
+
+    if (!res.ok) throw new Error("Signup failed");
+    const data = await res.json();
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
   };
 
-  // Mock signup function
-  const signup = async (name: string, email: string, pass: string): Promise<void> => {
-    setLoading(true);
-    // In a real app, you'd make an API call to register the user.
-    return new Promise(resolve => {
-        setTimeout(() => {
-            const newUser: User = { name, email };
-            localStorage.setItem('freshTradeUser', JSON.stringify(newUser));
-            setUser(newUser);
-            setLoading(false);
-            resolve();
-        }, 1000);
+  const login = async (email: string, password: string) => {
+    const res = await fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
     });
+
+    if (!res.ok) throw new Error("Login failed");
+    const data = await res.json();
+    setUser(data);
+    localStorage.setItem("user", JSON.stringify(data));
   };
 
-  // Logout function
   const logout = () => {
-    localStorage.removeItem('freshTradeUser');
     setUser(null);
+    localStorage.removeItem("user");
   };
-
-  const value = { user, loading, login, signup, logout };
 
   return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, signup, login, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };

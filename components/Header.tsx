@@ -79,7 +79,7 @@ const Header: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <span className="text-sm text-gray-700">Welcome, {user.name}!</span>
+                <span className="text-sm text-gray-700">Welcome {user.name}!</span>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -167,7 +167,7 @@ const Header: React.FC = () => {
                   {link.name}
                 </NavLink>
               ))}
-              {user && (
+              {user && user.email === "pritheesp@gmail.com" && (
                 <NavLink
                   to="/admin"
                   onClick={() => setIsOpen(false)}
@@ -177,6 +177,7 @@ const Header: React.FC = () => {
                   Admin
                 </NavLink>
               )}
+
               <div className="border-t my-3"></div>
               {user ? (
                 <motion.button

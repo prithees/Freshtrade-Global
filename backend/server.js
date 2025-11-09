@@ -2,33 +2,40 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
-import productRoutes from "./routes/productRoutes.js"; // ✅ make sure this path is correct
+import dotenv from "dotenv";
+import productRoutes from "./routes/productRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+
+dotenv.config();
 
 const app = express();
 
-const username = "prithees";
-const password = "Prithees@007";
-
-const connection = `mongodb+srv://${username}:${encodeURIComponent(
-  password
-)}@cluster1.cmhbhtz.mongodb.net/Freshtrade?retryWrites=true&w=majority`;
-mongoose
-  .connect(connection, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ MongoDB connected successfully"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
-
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
 
-// ✅ Mount your routes
+const username = process.env.MONGO_USERNAME;
+const password = process.env.MONGO_PASSWORD;
+const dbName = process.env.MONGO_DB_NAME;
+
+const connectionString = `mongodb+srv://${username}:${encodeURIComponent(
+  password
+)}@cluster1.cmhbhtz.mongodb.net/${dbName}?retryWrites=true&w=majority`;
+
+mongoose
+  .connect(connectionString)
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err.message));
+
 app.use("/api/products", productRoutes);
+app.use("/api/users", userRoutes);
 
-app.get("/api",(req, res) => {
-  res.json({ status: "OK", message: "API is healthy" });
+app.get("/api", (req, res) => {
+  res.json({ status: "OK", message: "API is healthy 🚀" });
 });
 
 app.get("/", (req, res) => {
-  res.send("FreshTrade Backend Running ✅");
+  res.send("🌿 FreshTrade Backend Running Successfully!");
 });
 
 const PORT = process.env.PORT || 4000;
