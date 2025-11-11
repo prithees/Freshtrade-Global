@@ -14,6 +14,8 @@ import AdminPage from './pages/AdminPage';
 import { AuthProvider } from './context/AuthContext';
 import { ProductProvider } from './context/ProductContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ContactListPage from "./pages/contactListPage";
+import JobListPage from "./pages/jobListPage";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -42,6 +44,8 @@ const App: React.FC = () => {
                   <AdminPage />
                 </ProtectedRoute>
               } />
+              <Route path="/contacts" element={<ContactListPage />} />
+              <Route path="/jobs" element={<JobListPage />} />
             </Routes>
           </main>
           <Footer />
