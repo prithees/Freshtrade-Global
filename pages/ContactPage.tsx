@@ -50,11 +50,29 @@ const FAQItem: React.FC<{ question: string; answer: string }> = ({ question, ans
 const ContactPage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000); // auto-hide after 4s
+  
+    const formData = new FormData(e.currentTarget);
+    const data = Object.fromEntries(formData.entries());
+  
+    try {
+      const res = await fetch("http://localhost:4000/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+  
+      if (!res.ok) throw new Error("Failed to send message");
+  
+      setSubmitted(true);
+      e.currentTarget.reset();
+      setTimeout(() => setSubmitted(false), 4000);
+    } catch (err) {
+      console.error(err);
+      }
   };
+  
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">

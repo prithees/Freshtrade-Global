@@ -5,6 +5,9 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js"; 
+import jobRoutes from "./routes/jobRoutes.js";
+
 
 dotenv.config();
 
@@ -29,6 +32,8 @@ mongoose
 
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/contact", contactRoutes); 
+app.use("/api/jobs", jobRoutes);
 
 app.get("/api", (req, res) => {
   res.json({ status: "OK", message: "API is healthy 🚀" });

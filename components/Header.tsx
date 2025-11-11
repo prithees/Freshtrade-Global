@@ -3,7 +3,8 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV_LINKS } from "../constants";
 import { useAuth } from "../context/AuthContext";
-
+import ContactListPage from "../pages/contactListPage";
+import JobListPage from "../pages/jobListPage";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -76,6 +77,25 @@ const Header = () => {
                   Admin
                 </NavLink>
               )}
+                  {/* ✅ Contact List Link */}
+    {user && user.email === "pritheesp@gmail.com" && (
+      <NavLink
+        to="/contacts"
+        className={desktopLinkClasses}
+        style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+      >
+        Contact Lists
+      </NavLink>
+    )}
+        {user && user.email === "pritheesp@gmail.com" && (
+      <NavLink
+        to="/jobs"
+        className={desktopLinkClasses}
+        style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+      >
+        Add job
+      </NavLink>
+    )}
             </div>
           </nav>
 
@@ -186,17 +206,35 @@ const Header = () => {
                 </NavLink>
               ))}
 
-              {user && user.email === "pritheesp@gmail.com" && (
-                <NavLink
-                  to="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className={mobileLinkClasses}
-                  style={({ isActive }) => (isActive ? activeLinkStyle : {})}
-                >
-                  Admin
-                </NavLink>
-              )}
+{user && user.email === "pritheesp@gmail.com" && (
+      <NavLink
+        to="/admin"
+        className={desktopLinkClasses}
+        style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+      >
+        Admin
+      </NavLink>
+    )}
 
+    {/* ✅ Contact List Link */}
+    {user && user.email === "pritheesp@gmail.com" && (
+      <NavLink
+        to="/contacts"
+        className={desktopLinkClasses}
+        style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+      >
+        Contact Lists
+      </NavLink>
+    )}
+        {user && user.email === "pritheesp@gmail.com" && (
+      <NavLink
+        to="/jobs"
+        className={desktopLinkClasses}
+        style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+      >
+        Add Job
+      </NavLink>
+    )}
               <div className="border-t my-3"></div>
 
               {user ? (
