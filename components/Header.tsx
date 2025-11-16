@@ -5,6 +5,8 @@ import { NAV_LINKS } from "../constants";
 import { useAuth } from "../context/AuthContext";
 import ContactListPage from "../pages/contactListPage";
 import JobListPage from "../pages/jobListPage";
+import OrderListPage from "../pages/OrderList";
+
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -96,6 +98,17 @@ const Header = () => {
         Add job
       </NavLink>
     )}
+{user && user.email === "pritheesp@gmail.com" && (
+  <NavLink
+    to="/orders/unclosed"
+    className={desktopLinkClasses}
+    style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+  >
+    Unclosed Orders
+  </NavLink>
+)}
+
+    
             </div>
           </nav>
 
@@ -233,6 +246,15 @@ const Header = () => {
         style={({ isActive }) => (isActive ? activeLinkStyle : {})}
       >
         Add Job
+      </NavLink>
+    )}
+{user && user.email === "pritheesp@gmail.com" && (
+      <NavLink
+        to="/order/unclosed"
+        className={desktopLinkClasses}
+        style={({ isActive }) => (isActive ? activeLinkStyle : {})}
+      >
+        Unclosed Orders
       </NavLink>
     )}
               <div className="border-t my-3"></div>

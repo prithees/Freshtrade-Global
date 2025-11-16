@@ -1,0 +1,203 @@
+/* ==========================================================
+   🌟 GLOBAL RESET + BASE
+========================================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: "Inter", sans-serif;
+  background: #fdfdfd;
+  color: #111;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+/* ==========================================================
+   🌈 COLOR SYSTEM — Light Mode
+========================================================== */
+:root {
+  --bg: #ffffff;
+  --text: #0f172a;
+  --card: #ffffffd0;
+  --border: #e5e5e5;
+  --primary: #4ade80;        /* Light green */
+  --primary-dark: #22c55e;   /* Strong green */
+  --accent: #14b8a6;
+  --shadow: rgba(0,0,0,0.07);
+}
+
+/* ==========================================================
+   ✨ SMOOTH ANIMATIONS
+========================================================== */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* ==========================================================
+   🎨 CARD DESIGN — GLASS EFFECT
+========================================================== */
+.card {
+  background: var(--card);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 6px 25px var(--shadow);
+  transition: 0.25s ease;
+  transform: translateY(0);
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+}
+
+/* ==========================================================
+   🎛 BUTTONS — LIGHT BG + DARK TEXT + ANIMATION
+========================================================== */
+button, .btn {
+  cursor: pointer;
+  padding: 12px 18px;
+  background: var(--primary);
+  color: #0f172a;                   /* DARK TEXT */
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  letter-spacing: .3px;
+  transition: 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+button:hover, .btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+/* ⛓ Button Ripple Effect */
+button::after {
+  content: "";
+  position: absolute;
+  width: 0px;
+  height: 0px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  left: var(--x);
+  top: var(--y);
+  opacity: 0;
+  transition: width .4s ease, height .4s ease, opacity .4s ease;
+}
+
+button:active::after {
+  width: 180px;
+  height: 180px;
+  opacity: 0;
+}
+
+/* ==========================================================
+   📝 INPUTS — SMOOTH FOCUS ANIMATION
+========================================================== */
+input, textarea {
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(20,184,166,0.25);
+  transform: scale(1.01);
+}
+
+/* ==========================================================
+   🌐 NAVBAR HOVER ANIMATION
+========================================================== */
+.nav-link {
+  position: relative;
+  padding-bottom: 3px;
+  font-weight: 600;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  height: 3px;
+  width: 0;
+  left: 0;
+  bottom: -2px;
+  background: var(--accent);
+  border-radius: 10px;
+  transition: width .3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ==========================================================
+   🌟 PRODUCT CARD HIGHLIGHT ON HOVER
+========================================================== */
+.product-card {
+  transition: .3s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  cursor: pointer;
+}
+
+/* ==========================================================
+   📜 SCROLLBAR
+========================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b3b3b3;
+}
+
+/* ==========================================================
+   🔧 UTILITIES
+========================================================== */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
