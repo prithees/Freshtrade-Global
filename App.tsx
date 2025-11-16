@@ -16,6 +16,8 @@ import { ProductProvider } from './context/ProductContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ContactListPage from "./pages/contactListPage";
 import JobListPage from "./pages/jobListPage";
+import OrderListPage from "./pages/OrderList";
+import './styles/globals.css';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -46,6 +48,7 @@ const App: React.FC = () => {
               } />
               <Route path="/contacts" element={<ContactListPage />} />
               <Route path="/jobs" element={<JobListPage />} />
+              <Route path="/orders/unclosed" element={<OrderListPage />} />
             </Routes>
           </main>
           <Footer />

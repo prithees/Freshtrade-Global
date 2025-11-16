@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, Briefcase, MapPin, Clock, ChevronDown, Plus, Copy, CheckCircle, AlertCircle, Filter, X } from 'lucide-react';
 
 interface JobType {
   _id: string;
   title: string;
   company: string;
   location: string;
-  type: string; // e.g., Full-Time, Part-Time, Internship
+  type: string;
   description: string;
   postedAt: string;
 }
@@ -15,23 +18,32 @@ const JobListPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobType[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [toast, setToast] = useState<{ type: string; message: string } | null>(
+    null
+  );
 
-  // form data
   const [newJob, setNewJob] = useState({
-    title: "",
-    company: "",
-    location: "",
-    type: "Full-Time",
-    description: "",
+    title: '',
+    company: '',
+    location: '',
+    type: 'Full-Time',
+    description: '',
   });
 
   const fetchJobs = async () => {
     try {
-      const res = await fetch("http://localhost:4000/api/jobs");
+      const res = await fetch('http://localhost:4000/api/jobs');
       const data = await res.json();
       setJobs(data);
     } catch (err) {
-      console.error("Error fetching jobs:", err);
+      console.error('Error fetching jobs:', err);
+      showToast('error', 'Failed to load jobs');
     } finally {
       setLoading(false);
     }
@@ -41,156 +53,392 @@ const JobListPage: React.FC = () => {
     fetchJobs();
   }, []);
 
-  // ✅ Add new job
+  const showToast = (type: string, message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const handleAddJob = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newJob.title || !newJob.company || !newJob.location || !newJob.description) {
-      alert("Please fill all fields");
+    if (
+      !newJob.title ||
+      !newJob.company ||
+      !newJob.location ||
+      !newJob.description
+    ) {
+      showToast('error', 'Please fill all fields');
       return;
     }
 
     setAdding(true);
 
     try {
-      const res = await fetch("http://localhost:4000/api/jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('http://localhost:4000/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newJob),
       });
       const data = await res.json();
 
       if (data.success) {
-        alert("✅ Job added successfully!");
+        showToast('success', 'Job added successfully!');
         setNewJob({
-          title: "",
-          company: "",
-          location: "",
-          type: "Full-Time",
-          description: "",
+          title: '',
+          company: '',
+          location: '',
+          type: 'Full-Time',
+          description: '',
         });
+        setShowForm(false);
         fetchJobs();
       } else {
-        alert(data.error || "Failed to add job");
+        showToast('error', data.error || 'Failed to add job');
       }
     } catch (err) {
-      console.error("Error adding job:", err);
-      alert("Server error");
+      console.error('Error adding job:', err);
+      showToast('error', 'Server error');
     } finally {
       setAdding(false);
     }
   };
 
-  if (loading)
-    return <div className="text-center mt-20 text-gray-600">Loading jobs...</div>;
+  const copyJobId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    showToast('success', 'Job ID copied!');
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const filteredJobs = jobs
+    .filter((job) => {
+      const matchesSearch = job.title
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+        job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesFilter =
+        filterType === 'all' || job.type === filterType;
+
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'recent')
+        return (
+          new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
+        );
+      if (sortBy === 'oldest')
+        return (
+          new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime()
+        );
+      return 0;
+    });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-10 px-4">
-      <div className="max-w-6xl mx-auto bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white text-center">
-          💼 Job Listings
-        </h1>
-
-        {/* ✅ Add Job Form */}
-        <form
-          onSubmit={handleAddJob}
-          className="mb-8 bg-gray-100 dark:bg-gray-700 p-5 rounded-xl shadow-sm"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-12"
         >
-          <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200">
-            ➕ Post a New Job
-          </h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Job Title"
-              value={newJob.title}
-              onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
-              className="p-2 rounded border focus:ring-2 focus:ring-green-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Company"
-              value={newJob.company}
-              onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
-              className="p-2 rounded border focus:ring-2 focus:ring-green-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Location"
-              value={newJob.location}
-              onChange={(e) => setNewJob({ ...newJob, location: e.target.value })}
-              className="p-2 rounded border focus:ring-2 focus:ring-green-500"
-              required
-            />
-            <select
-              value={newJob.type}
-              onChange={(e) => setNewJob({ ...newJob, type: e.target.value })}
-              className="p-2 rounded border focus:ring-2 focus:ring-green-500"
+          <div className="flex justify-between items-start gap-6 mb-8">
+            <div>
+              <h1 className="text-5xl font-bold text-gray-900 mb-2">
+                Job Listings
+              </h1>
+              <p className="text-blue-600 text-lg">
+                Discover and manage job opportunities
+              </p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowForm(!showForm)}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/30 transition"
             >
-              <option>Full-Time</option>
-              <option>Part-Time</option>
-              <option>Internship</option>
-            </select>
+              <Plus size={20} /> Post Job
+            </motion.button>
           </div>
 
-          <textarea
-            placeholder="Job Description"
-            value={newJob.description}
-            onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
-            className="w-full mt-4 p-2 rounded border focus:ring-2 focus:ring-green-500"
-            rows={4}
-            required
-          ></textarea>
-
-          <button
-            type="submit"
-            disabled={adding}
-            className="mt-4 bg-green-500 text-white px-5 py-2 rounded hover:bg-green-600 transition"
-          >
-            {adding ? "Adding..." : "Add Job"}
-          </button>
-        </form>
-
-        {/* ✅ Job Listing */}
-        {/* {jobs.length === 0 ? (
-          <p className="text-center text-gray-500">No job posts yet.</p>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {jobs.map((job) => (
-              <motion.div
-                key={job._id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="p-5 border rounded-xl shadow hover:shadow-md transition bg-white dark:bg-gray-700"
+          {/* Form */}
+          <AnimatePresence>
+            {showForm && (
+              <motion.form
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                onSubmit={handleAddJob}
+                className="bg-blue-50/50 backdrop-blur border border-blue-200 p-6 rounded-xl mb-8 space-y-4"
               >
-                <h2 className="text-xl font-semibold text-green-600">{job.title}</h2>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {job.company} • {job.location}
-                </p>
-                <span className="inline-block mt-2 px-2 py-1 text-sm bg-green-100 text-green-700 rounded-full">
-                  {job.type}
-                </span>
-                <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm">
-                  {job.description.length > 100
-                    ? job.description.slice(0, 100) + "..."
-                    : job.description}
-                </p>
-                <p className="mt-3 text-xs text-gray-500">
-                  Posted on: {new Date(job.postedAt).toLocaleDateString()}
-                </p>
-                <button
-                  className="mt-4 w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition"
-                  onClick={() => alert(`Apply for ${job.title}`)}
-                >
-                  Apply Now
-                </button>
-              </motion.div>
-            ))}
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  Post a New Job
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Job Title"
+                    value={newJob.title}
+                    onChange={(e) =>
+                      setNewJob({ ...newJob, title: e.target.value })
+                    }
+                    className="bg-white text-gray-900 placeholder-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Company"
+                    value={newJob.company}
+                    onChange={(e) =>
+                      setNewJob({ ...newJob, company: e.target.value })
+                    }
+                    className="bg-white text-gray-900 placeholder-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="Location"
+                    value={newJob.location}
+                    onChange={(e) =>
+                      setNewJob({ ...newJob, location: e.target.value })
+                    }
+                    className="bg-white text-gray-900 placeholder-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                    required
+                  />
+                  <select
+                    value={newJob.type}
+                    onChange={(e) =>
+                      setNewJob({ ...newJob, type: e.target.value })
+                    }
+                    className="bg-white text-gray-900 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                  >
+                    <option>Full-Time</option>
+                    <option>Part-Time</option>
+                  </select>
+                </div>
+                <textarea
+                  placeholder="Job Description"
+                  value={newJob.description}
+                  onChange={(e) =>
+                    setNewJob({ ...newJob, description: e.target.value })
+                  }
+                  className="w-full bg-white text-gray-900 placeholder-gray-500 border border-gray-300 p-3 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+                  rows={4}
+                  required
+                ></textarea>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    type="submit"
+                    disabled={adding}
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg font-semibold disabled:opacity-50 transition"
+                  >
+                    {adding ? 'Adding...' : 'Add Job'}
+                  </motion.button>
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(false)}
+                    className="bg-gray-200 text-gray-900 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Controls */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white/50 backdrop-blur border border-gray-300 p-4 rounded-lg mb-8 flex flex-col md:flex-row gap-4 items-center"
+        >
+          <div className="flex-1 relative">
+            <Search
+              className="absolute left-3 top-3 text-gray-400"
+              size={20}
+            />
+            <input
+              type="text"
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white text-gray-900 placeholder-gray-500 border border-gray-300 pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+            />
           </div>
-        )} */}
+
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="bg-white text-gray-900 border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+          >
+            <option value="all">All Types</option>
+            <option value="Full-Time">Full-Time</option>
+            <option value="Part-Time">Part-Time</option>
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-white text-gray-900 border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-200 transition"
+          >
+            <option value="recent">Most Recent</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </motion.div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="min-h-screen flex items-center justify-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full"
+            />
+          </div>
+        )}
+
+        {/* Job Cards */}
+        {!loading && (
+          <AnimatePresence mode="popLayout">
+            {filteredJobs.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-16"
+              >
+                <AlertCircle className="mx-auto w-16 h-16 text-blue-300 mb-4" />
+                <p className="text-gray-600 text-lg">No jobs found</p>
+              </motion.div>
+            ) : (
+              <div className="space-y-4">
+                {filteredJobs.map((job, idx) => (
+                  <motion.div
+                    key={job._id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="group"
+                  >
+                    <motion.button
+                      onClick={() =>
+                        setExpandedId(expandedId === job._id ? null : job._id)
+                      }
+                      className="w-full text-left bg-white hover:bg-gray-50 border border-gray-300 hover:border-blue-400 p-6 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition">
+                            {job.title}
+                          </h2>
+                          <div className="flex flex-wrap gap-4 text-gray-600 text-sm">
+                            <div className="flex items-center gap-1">
+                              <Briefcase size={16} />
+                              {job.company}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin size={16} />
+                              {job.location}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock size={16} />
+                              {job.type}
+                            </div>
+                            <div className="text-blue-600">
+                              {new Date(job.postedAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                        <motion.div
+                          animate={{
+                            rotate: expandedId === job._id ? 180 : 0,
+                          }}
+                        >
+                          <ChevronDown
+                            className="text-gray-400 group-hover:text-blue-600"
+                            size={24}
+                          />
+                        </motion.div>
+                      </div>
+                    </motion.button>
+
+                    <AnimatePresence>
+                      {expandedId === job._id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="bg-gray-50 border border-t-0 border-gray-300 p-6 rounded-b-lg"
+                        >
+                          <p className="text-gray-700 leading-relaxed mb-4">
+                            {job.description}
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            {/* <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() => copyJobId(job._id)}
+                              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/30 transition"
+                            >
+                              {copiedId === job._id ? (
+                                <>
+                                  <CheckCircle size={18} /> Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Copy size={18} /> Copy ID
+                                </>
+                              )}
+                            </motion.button> */}
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                              onClick={() =>
+                                showToast('success', `Applying for ${job.title}`)
+                              }
+                              className="border border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg font-semibold transition"
+                            >
+                              Apply Now
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
+        )}
+
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className={`fixed bottom-6 right-6 px-6 py-3 rounded-lg font-semibold flex items-center gap-2 ${
+                toast.type === 'success'
+                  ? 'bg-emerald-100 border border-emerald-300 text-emerald-700'
+                  : 'bg-red-100 border border-red-300 text-red-700'
+              }`}
+            >
+              {toast.type === 'success' ? (
+                <CheckCircle size={18} />
+              ) : (
+                <AlertCircle size={18} />
+              )}
+              {toast.message}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

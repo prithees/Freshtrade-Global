@@ -17,33 +17,33 @@ const AnimatedSection: React.FC<{ children: React.ReactNode }> = ({ children }) 
 );
 
 // 🌞 Dark/Light theme toggle
-const ThemeToggle: React.FC = () => {
-  const [darkMode, setDarkMode] = useState<boolean>(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  );
+// const ThemeToggle: React.FC = () => {
+//   const [darkMode, setDarkMode] = useState<boolean>(() =>
+//     window.matchMedia('(prefers-color-scheme: dark)').matches
+//   );
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-  }, [darkMode]);
+//   useEffect(() => {
+//     document.documentElement.classList.toggle('dark', darkMode);
+//   }, [darkMode]);
 
-  return (
-    <motion.button
-      onClick={() => setDarkMode(!darkMode)}
-      className="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-800 p-3 rounded-full shadow-lg hover:scale-110 transition"
-      whileTap={{ rotate: 360 }}
-    >
-      {darkMode ? (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M21.752 15.002A9.718 9.718 0 0112 21a9.718 9.718 0 01-9.752-5.998A9.97 9.97 0 0112 2a9.97 9.97 0 019.752 13.002z" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.485-8.485l-.707.707M4.222 4.222l.707.707M21 12h1M2 12H1m15.071 6.364l.707.707M4.222 19.778l.707-.707" />
-        </svg>
-      )}
-    </motion.button>
-  );
-};
+//   return (
+//     <motion.button
+//       onClick={() => setDarkMode(!darkMode)}
+//       className="fixed top-4 right-4 z-50 bg-gray-200 dark:bg-gray-800 p-3 rounded-full shadow-lg hover:scale-110 transition"
+//       whileTap={{ rotate: 360 }}
+//     >
+//       {darkMode ? (
+//         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
+//           <path d="M21.752 15.002A9.718 9.718 0 0112 21a9.718 9.718 0 01-9.752-5.998A9.97 9.97 0 0112 2a9.97 9.97 0 019.752 13.002z" />
+//         </svg>
+//       ) : (
+//         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m8.485-8.485l-.707.707M4.222 4.222l.707.707M21 12h1M2 12H1m15.071 6.364l.707.707M4.222 19.778l.707-.707" />
+//         </svg>
+//       )}
+//     </motion.button>
+//   );
+// };
 
 // 🌍 Hero Section with particles
 const Hero = () => {
@@ -210,7 +210,7 @@ const Testimonials = () => (
 const HomePage: React.FC = () => {
   return (
     <>
-      <ThemeToggle />
+      {/* <ThemeToggle /> */}
       <Hero />
       <HowItWorks />
       <Testimonials />
