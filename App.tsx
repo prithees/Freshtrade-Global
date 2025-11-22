@@ -18,6 +18,7 @@ import ContactListPage from "./pages/contactListPage";
 import JobListPage from "./pages/jobListPage";
 import OrderListPage from "./pages/OrderList";
 import './styles/globals.css';
+import WhatsAppButton from './components/Whatsappbutton';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -31,27 +32,37 @@ const App: React.FC = () => {
       <ProductProvider>
         <div className="flex flex-col min-h-screen">
           <Header />
+
           <main className="flex-grow">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/products" element={<ProductsPage />} />
-              <Route path="/careers" element={<CareersPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/careers" element={<CareersPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
-              <Route path="/admin" element={
-                <ProtectedRoute>
-                  <AdminPage />
-                </ProtectedRoute>
-              } />
+
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route path="/contacts" element={<ContactListPage />} />
               <Route path="/jobs" element={<JobListPage />} />
               <Route path="/orders/unclosed" element={<OrderListPage />} />
             </Routes>
           </main>
+
           <Footer />
+
+          <WhatsAppButton />
+
         </div>
       </ProductProvider>
     </AuthProvider>

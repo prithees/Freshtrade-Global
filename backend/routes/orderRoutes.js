@@ -21,10 +21,14 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Get all unclosed orders
 router.get("/unclosed", async (req, res) => {
-  const orders = await Order.find({ isClosed: false })
-    .sort({ createdAt: -1 });
-  res.json(orders);
+  try {
+    const orders = await Order.find({ isClosed: false }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Get all orders (Admin)
@@ -37,7 +41,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get orders for a specific customer by email
+// Get orders for a specific customer
 router.get("/user/:email", async (req, res) => {
   try {
     const orders = await Order.find({
@@ -45,6 +49,25 @@ router.get("/user/:email", async (req, res) => {
     }).sort({ createdAt: -1 });
 
     res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Close Order (NEW ROUTE)
+router.put("/close/:id", async (req, res) => {
+  try {
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { isClosed: true },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json({ message: "Order closed successfully", order });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
