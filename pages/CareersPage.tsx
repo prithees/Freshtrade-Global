@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Lottie from "lottie-react";
-import teamAnimation from "./assets/About Us Team.json"; // optional
-
+import teamAnimation from "./assets/About Us Team.json";
+import { CAREERS_GOOGLE_FORM_URL } from "../constants";
 interface JobType {
   _id: string;
   title: string;
@@ -38,7 +38,7 @@ const JobOpening: React.FC<{
     </div>
     <div className="mt-4 sm:mt-0 sm:ml-6">
       <motion.a
-        href="mailto:careers@freshtradeglobal.com"
+        href={CAREERS_GOOGLE_FORM_URL}
         className="bg-green-500 text-white font-semibold px-6 py-2 rounded-full hover:bg-green-600 focus:ring-4 focus:ring-green-300 transition-all"
         whileHover={{ scale: 1.05 }}
       >

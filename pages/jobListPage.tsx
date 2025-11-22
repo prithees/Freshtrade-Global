@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Briefcase, MapPin, Clock, ChevronDown, Plus, Copy, CheckCircle, AlertCircle, Filter, X } from 'lucide-react';
-
+import { Search, Briefcase, MapPin, Clock, ChevronDown, Plus, Copy, CheckCircle, AlertCircle, Filter, X,Pencil,Trash2 } from 'lucide-react';
+import axios from 'axios';
 interface JobType {
   _id: string;
   title: string;
@@ -20,6 +20,12 @@ const JobListPage: React.FC = () => {
   const [adding, setAdding] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editJob, setEditJob] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const [deleteId, setDeleteId] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -57,6 +63,42 @@ const JobListPage: React.FC = () => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
   };
+  const openEditModal = (job: any) => {
+    setEditJob(job);
+    setShowEditModal(true);
+  };
+  
+  const openDeleteConfirm = (id: string) => {
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+  
+  // UPDATE JOB API
+  const updateJob = async () => {
+    try {
+      const res = await axios.put(`http://localhost:4000/api/jobs/${editJob._id}`, editJob);
+  
+      setToast({ type: "success", message: "Job updated successfully" });
+      setShowEditModal(false);
+      fetchJobs();
+    } catch (err) {
+      setToast({ type: "error", message: "Error updating job" });
+    }
+  };
+  
+  // DELETE JOB API
+  const deleteJob = async () => {
+    console.log("Deleting job with ID:", deleteId);
+    try {
+      await axios.delete(`http://localhost:4000/api/jobs/${deleteId}`);
+      setToast({ type: "success", message: "Job deleted successfully" });
+      setShowDeleteModal(false);
+      fetchJobs();
+    } catch (err) {
+      setToast({ type: "error", message: "Error deleting job" });
+    }
+  };
+  
 
   const handleAddJob = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -367,6 +409,141 @@ const JobListPage: React.FC = () => {
                         </motion.div>
                       </div>
                     </motion.button>
+                  {/* ACTION BUTTONS */}
+                  <div className="flex flex-wrap gap-3 mb-4">
+                    {/* Edit Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => openEditModal(job)}
+                      className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+                    >
+                      <Pencil size={18} />
+                      Edit Job
+                    </motion.button>
+
+                    {/* Delete Button */}
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => openDeleteConfirm(job._id)}
+                      className="flex items-center gap-2 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+                    >
+                      <Trash2 size={18} />
+                      Delete Job
+                    </motion.button>
+                  </div>
+                  {/* EDIT JOB MODAL */}
+                  {/* DELETE CONFIRM MODAL */}
+<AnimatePresence>
+  {showDeleteModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.8 }}
+        className="bg-white p-6 rounded-xl w-full max-w-sm shadow-lg"
+      >
+        <h2 className="text-xl font-bold">Delete Job?</h2>
+        <p className="text-gray-600 mt-2">
+          Are you sure you want to delete this job? This action cannot be undone.
+        </p>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={() => setShowDeleteModal(false)}
+            className="px-5 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={deleteJob}
+            className="px-5 py-2 bg-red-600 text-white rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+<AnimatePresence>
+  {showEditModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        exit={{ scale: 0.8 }}
+        className="bg-white p-6 rounded-xl w-full max-w-lg shadow-lg"
+      >
+        <h2 className="text-xl font-bold mb-4">Edit Job</h2>
+
+        <div className="space-y-3">
+          <input
+            type="text"
+            value={editJob.title}
+            onChange={(e) => setEditJob({ ...editJob, title: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+            placeholder="Job Title"
+          />
+
+          <input
+            type="text"
+            value={editJob.company}
+            onChange={(e) => setEditJob({ ...editJob, company: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+            placeholder="Company"
+          />
+
+          <input
+            type="text"
+            value={editJob.location}
+            onChange={(e) => setEditJob({ ...editJob, location: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+            placeholder="Location"
+          />
+
+          <textarea
+            value={editJob.description}
+            onChange={(e) => setEditJob({ ...editJob, description: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+            rows={4}
+          ></textarea>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <button
+            onClick={() => setShowEditModal(false)}
+            className="px-5 py-2 border rounded-lg"
+          >
+            Cancel
+          </button>
+
+          <button
+            onClick={updateJob}
+            className="px-5 py-2 bg-blue-600 text-white rounded-lg"
+          >
+            Save Changes
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
 
                     <AnimatePresence>
                       {expandedId === job._id && (
@@ -380,22 +557,6 @@ const JobListPage: React.FC = () => {
                             {job.description}
                           </p>
                           <div className="flex flex-wrap gap-3">
-                            {/* <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => copyJobId(job._id)}
-                              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg font-semibold flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/30 transition"
-                            >
-                              {copiedId === job._id ? (
-                                <>
-                                  <CheckCircle size={18} /> Copied!
-                                </>
-                              ) : (
-                                <>
-                                  <Copy size={18} /> Copy ID
-                                </>
-                              )}
-                            </motion.button> */}
                             <motion.button
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}

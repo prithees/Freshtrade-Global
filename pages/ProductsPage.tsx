@@ -79,7 +79,7 @@ const ProductCard: React.FC<{
       transition={{ type: "spring", stiffness: 200, damping: 18 }}
     >
       {/* Favorite Button */}
-      <motion.button
+      {/* <motion.button
         onClick={(e) => {
           e.stopPropagation()
           toggleFavorite(productIndex)
@@ -95,7 +95,7 @@ const ProductCard: React.FC<{
               : "text-gray-400 hover:text-red-500"
           }`}
         />
-      </motion.button>
+      </motion.button> */}
 
       {/* Stock Status Badge */}
       {isLowStock && (
@@ -150,11 +150,11 @@ const ProductCard: React.FC<{
         </div>
 
         {/* Min Order Qty Info */}
-        {product.minOrderQty > 1 && (
+        {/* {product.minOrderQty > 1 && (
           <p className="text-xs text-gray-500 mb-3 bg-gray-100 px-2 py-1 rounded-md w-fit">
             Min: {product.minOrderQty}
           </p>
-        )}
+        )} */}
 
         <div className="flex justify-between items-center gap-2">
           <motion.button
@@ -980,12 +980,12 @@ const ProductsPage: React.FC = () => {
               )}
             </div>
 
-            <motion.div 
+            {/* <motion.div 
               className="bg-white px-4 py-2 rounded-full shadow-md text-gray-800 font-bold"
               whileHover={{ scale: 1.05 }}
             >
               ❤️ {favorites.size} Favorites
-            </motion.div>
+            </motion.div> */}
           </div>
         </motion.div>
       </div>
